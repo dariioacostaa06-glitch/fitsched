@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FitSched — Reserva tu Clase en Segundos</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{font-family:'Inter',sans-serif}
+body{background:#080810;color:#f0f0f0}
+.glass{background:rgba(255,255,255,0.04);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08)}
+.accent{color:#a855f7}
+.accent-bg{background:linear-gradient(135deg,#a855f7,#ec4899)}
+.btn-primary{background:linear-gradient(135deg,#a855f7,#ec4899);color:#fff;font-weight:700;transition:all .2s;border-radius:12px;padding:14px 28px;border:none}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(168,85,247,.4)}
+.card{background:#0e0e1a;border:1px solid #1a1a2e;border-radius:20px;transition:all .3s}
+input,select{background:#0e0e1a;border:1px solid #1a1a2e;color:#f0f0f0;border-radius:10px;padding:12px 16px;width:100%;outline:none;transition:border .2s}
+input:focus,select:focus{border-color:#a855f7}
+select option{background:#0e0e1a}
+.class-card{background:#0e0e1a;border:1px solid #1a1a2e;border-radius:16px;padding:16px;transition:all .3s;position:relative;overflow:hidden}
+.class-card:hover{border-color:#a855f740;transform:translateY(-2px)}
+.class-card.full{opacity:.6}
+.occ-bar{height:5px;background:#1a1a2e;border-radius:3px;overflow:hidden;margin-top:8px}
+.occ-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.occ-low{background:linear-gradient(90deg,#22c55e,#4ade80)}
+.occ-mid{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+.occ-high{background:linear-gradient(90deg,#ef4444,#f97316)}
+.day-tab{padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;transition:all .2s;border:1px solid transparent}
+.day-tab.active{background:rgba(168,85,247,.2);border-color:#a855f7;color:#a855f7}
+.day-tab:not(.active):hover{border-color:#1a1a2e;background:#0e0e1a}
+.plan-card{background:#0e0e1a;border:2px solid #1a1a2e;border-radius:20px;padding:28px;transition:all .3s;text-align:center}
+.plan-card.featured{border-color:#a855f7;background:linear-gradient(135deg,#1a0a2e,#0e0e1a);box-shadow:0 0 40px rgba(168,85,247,.2)}
+.plan-card:hover{transform:translateY(-4px)}
+.imc-bar{height:12px;border-radius:6px;background:linear-gradient(90deg,#3b82f6,#22c55e,#f59e0b,#ef4444);margin:8px 0;position:relative}
+.imc-pointer{width:3px;height:20px;background:white;border-radius:2px;position:absolute;top:-4px;transition:left .5s ease}
+.booked-badge{position:absolute;top:10px;right:10px;background:#166534;color:#4ade80;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;border:1px solid #16a34a}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="fixed top-0 w-full z-50 glass border-b border-white/5">
+  <div class="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 accent-bg rounded-lg flex items-center justify-center font-black text-white text-sm">FS</div>
+      <span class="font-bold text-lg">FitSched</span>
+    </div>
+    <div class="hidden md:flex items-center gap-8 text-sm text-gray-400">
+      <a href="#clases" class="hover:text-white transition">Horario</a>
+      <a href="#imc" class="hover:text-white transition">IMC</a>
+      <a href="#planes" class="hover:text-white transition">Membresías</a>
+    </div>
+    <a href="#planes" class="btn-primary text-sm py-2 px-5">Únete ahora</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="relative min-h-[90vh] flex items-center overflow-hidden">
+  <div class="absolute inset-0">
+    <img src="img/hero.webp" class="w-full h-full object-cover opacity-25"/>
+    <div class="absolute inset-0 bg-gradient-to-r from-[#080810] via-[#080810]/85 to-transparent"></div>
+  </div>
+  <div class="relative max-w-6xl mx-auto px-6 pt-24">
+    <div class="inline-flex items-center gap-3 glass rounded-full px-4 py-2 text-sm mb-6">
+      <span class="w-2 h-2 bg-green-400 rounded-full"></span>
+      <span class="text-gray-300">37 personas entrenando ahora mismo</span>
+    </div>
+    <h1 class="text-5xl md:text-7xl font-black leading-tight">Entrena<br/><span class="accent">sin excusas.</span></h1>
+    <p class="text-gray-400 mt-6 text-xl max-w-xl leading-relaxed">Ve la ocupación de cada clase antes de salir de casa. Reserva en un toque y nunca llegues a una clase llena.</p>
+    <div class="flex flex-wrap gap-4 mt-10">
+      <a href="#clases" class="btn-primary text-base">Ver horario →</a>
+      <a href="#imc" class="glass text-white font-semibold rounded-xl px-7 py-4 border border-white/10 hover:border-purple-500/30 transition text-sm">Calcular mi IMC</a>
+    </div>
+  </div>
+</section>
+
+<!-- HORARIO DE CLASES -->
+<section id="clases" class="max-w-6xl mx-auto px-6 py-24">
+  <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+    <div>
+      <h2 class="text-3xl font-bold">Horario de clases</h2>
+      <p class="text-gray-500 mt-1">Actualizado en tiempo real · Reserva con hasta 48h de antelación</p>
+    </div>
+    <div class="flex gap-2 flex-wrap" id="day-tabs">
+      <button class="day-tab active" onclick="setDay(this,'Lun')">Lun</button>
+      <button class="day-tab" onclick="setDay(this,'Mar')">Mar</button>
+      <button class="day-tab" onclick="setDay(this,'Mié')">Mié</button>
+      <button class="day-tab" onclick="setDay(this,'Jue')">Jue</button>
+      <button class="day-tab" onclick="setDay(this,'Vie')">Vie</button>
+      <button class="day-tab" onclick="setDay(this,'Sáb')">Sáb</button>
+    </div>
+  </div>
+
+  <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4" id="classes-grid"></div>
+</section>
+
+<!-- IMC CALCULATOR -->
+<section id="imc" class="max-w-4xl mx-auto px-6 py-16">
+  <div class="card p-10">
+    <h2 class="text-3xl font-bold mb-2">Calculadora de <span class="accent">IMC y objetivos</span></h2>
+    <p class="text-gray-400 mb-8">Descubre tu índice de masa corporal y qué clases son ideales para tu objetivo.</p>
+
+    <div class="grid sm:grid-cols-3 gap-4 mb-6">
+      <div><label class="text-xs text-gray-500 uppercase tracking-wider mb-2 block">Peso (kg)</label><input type="number" id="imc-weight" placeholder="70" min="30" max="250"/></div>
+      <div><label class="text-xs text-gray-500 uppercase tracking-wider mb-2 block">Altura (cm)</label><input type="number" id="imc-height" placeholder="175" min="100" max="250"/></div>
+      <div><label class="text-xs text-gray-500 uppercase tracking-wider mb-2 block">Objetivo</label>
+        <select id="imc-goal">
+          <option value="perder">Perder peso</option>
+          <option value="ganar">Ganar músculo</option>
+          <option value="mantener">Mantenerme en forma</option>
+          <option value="flexibilidad">Mejorar flexibilidad</option>
+        </select>
+      </div>
+    </div>
+
+    <button onclick="calcIMC()" class="btn-primary px-8 py-3 text-sm mb-8">Calcular</button>
+
+    <div id="imc-result" class="hidden">
+      <div class="glass rounded-xl p-6 mb-6">
+        <div class="flex justify-between items-start mb-4">
+          <div>
+            <p class="text-gray-400 text-sm">Tu IMC</p>
+            <p class="text-5xl font-black accent" id="imc-val">24.2</p>
+          </div>
+          <div class="text-right">
+            <span id="imc-cat" class="text-sm font-bold px-3 py-1 rounded-full"></span>
+            <p class="text-xs text-gray-500 mt-2" id="imc-range"></p>
+          </div>
+        </div>
+        <div class="imc-bar">
+          <div class="imc-pointer" id="imc-ptr" style="left:30%"></div>
+        </div>
+        <div class="flex justify-between text-xs text-gray-600 mt-1">
+          <span>Bajo peso</span><span>Normal</span><span>Sobrepeso</span><span>Obesidad</span>
+        </div>
+      </div>
+
+      <div id="imc-reco" class="space-y-3">
+        <p class="font-semibold text-sm text-gray-400 uppercase tracking-wider">Clases recomendadas para ti</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PLANES -->
+<section id="planes" class="max-w-6xl mx-auto px-6 py-16">
+  <div class="text-center mb-12">
+    <h2 class="text-4xl font-black mb-3">Elige tu <span class="accent">membresía</span></h2>
+    <p class="text-gray-400">Sin permanencia. Cambia o cancela cuando quieras.</p>
+  </div>
+  <div class="grid md:grid-cols-3 gap-6">
+    <div class="plan-card">
+      <p class="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-3">Basic</p>
+      <p class="text-4xl font-black mb-1">29€<span class="text-lg font-normal text-gray-500">/mes</span></p>
+      <p class="text-gray-500 text-sm mb-6">Acceso libre · Sin clases dirigidas</p>
+      <ul class="text-sm text-gray-400 space-y-2 mb-8 text-left">
+        <li>✓ Acceso sala musculación</li>
+        <li>✓ Acceso cardio</li>
+        <li>✓ App de seguimiento</li>
+        <li class="text-gray-700 line-through">Clases dirigidas</li>
+        <li class="text-gray-700 line-through">Nutricionista</li>
+      </ul>
+      <button class="w-full glass py-3 rounded-xl font-semibold text-sm hover:border-purple-500/30 transition">Empezar Basic</button>
+    </div>
+    <div class="plan-card featured">
+      <div class="inline-block text-xs font-bold bg-purple-900/60 text-purple-300 border border-purple-700/50 rounded-full px-3 py-1 mb-3">MÁS POPULAR</div>
+      <p class="text-gray-300 text-sm font-semibold uppercase tracking-wider mb-3">Pro</p>
+      <p class="text-4xl font-black mb-1 accent">49€<span class="text-lg font-normal text-gray-500">/mes</span></p>
+      <p class="text-gray-500 text-sm mb-6">Todo incluido · Reserva con prioridad</p>
+      <ul class="text-sm text-gray-300 space-y-2 mb-8 text-left">
+        <li>✓ Todo lo de Basic</li>
+        <li>✓ Clases dirigidas ilimitadas</li>
+        <li>✓ Reserva prioritaria</li>
+        <li>✓ 1 sesión nutricionista/mes</li>
+        <li>✓ Análisis de composición corporal</li>
+      </ul>
+      <button class="btn-primary w-full py-3 text-sm">Empezar Pro</button>
+    </div>
+    <div class="plan-card">
+      <p class="text-gray-400 text-sm font-semibold uppercase tracking-wider mb-3">Elite</p>
+      <p class="text-4xl font-black mb-1">79€<span class="text-lg font-normal text-gray-500">/mes</span></p>
+      <p class="text-gray-500 text-sm mb-6">Entrenamiento personalizado</p>
+      <ul class="text-sm text-gray-400 space-y-2 mb-8 text-left">
+        <li>✓ Todo lo de Pro</li>
+        <li>✓ 4 PT sesiones/mes</li>
+        <li>✓ Plan nutricional completo</li>
+        <li>✓ Seguimiento semanal</li>
+        <li>✓ Acceso 24/7</li>
+      </ul>
+      <button class="w-full glass py-3 rounded-xl font-semibold text-sm hover:border-purple-500/30 transition">Empezar Elite</button>
+    </div>
+  </div>
+</section>
+
+<footer class="border-t border-white/5 py-10 text-center text-gray-600 text-sm">
+  <p class="font-bold text-white mb-1">FitSched Gym</p>
+  <p>Avenida del Deporte 45 · Lun–Vie 6:30–23:00 · Sáb–Dom 8:00–21:00</p>
+  <p class="mt-2">Desarrollado por <span class="accent font-semibold">PuntoZero Solutions</span></p>
+</footer>
+
+<script>
+const classData = {
+  Lun:[
+    {name:'HIIT Total',time:'7:00',duration:'45 min',spots:20,taken:18,instructor:'Ana M.',img:'class1',level:'Alto'},
+    {name:'Yoga Flow',time:'9:00',duration:'60 min',spots:15,taken:6,instructor:'Laura P.',img:'yoga',level:'Bajo'},
+    {name:'Spinning',time:'10:30',duration:'50 min',spots:18,taken:18,instructor:'Carlos R.',img:'cycling',level:'Medio'},
+    {name:'Body Pump',time:'12:00',duration:'55 min',spots:20,taken:11,instructor:'Marta S.',img:'weights',level:'Medio'},
+    {name:'Pilates',time:'17:30',duration:'50 min',spots:12,taken:5,instructor:'Elena V.',img:'yoga',level:'Bajo'},
+    {name:'CrossFit',time:'19:00',duration:'60 min',spots:16,taken:14,instructor:'Diego F.',img:'class1',level:'Alto'},
+  ],
+  Mar:[
+    {name:'Zumba',time:'8:00',duration:'60 min',spots:25,taken:12,instructor:'Sandra L.',img:'class1',level:'Bajo'},
+    {name:'HIIT Total',time:'10:00',duration:'45 min',spots:20,taken:20,instructor:'Ana M.',img:'class1',level:'Alto'},
+    {name:'Yoga Restaurativo',time:'11:30',duration:'60 min',spots:12,taken:4,instructor:'Laura P.',img:'yoga',level:'Bajo'},
+    {name:'Body Combat',time:'18:00',duration:'55 min',spots:20,taken:16,instructor:'Luis T.',img:'class1',level:'Medio'},
+    {name:'Spinning',time:'20:00',duration:'50 min',spots:18,taken:9,instructor:'Carlos R.',img:'cycling',level:'Medio'},
+  ],
+  Mié:[
+    {name:'HIIT Total',time:'7:00',duration:'45 min',spots:20,taken:17,instructor:'Ana M.',img:'class1',level:'Alto'},
+    {name:'Pilates',time:'9:30',duration:'50 min',spots:12,taken:8,instructor:'Elena V.',img:'yoga',level:'Bajo'},
+    {name:'Body Pump',time:'12:00',duration:'55 min',spots:20,taken:13,instructor:'Marta S.',img:'weights',level:'Medio'},
+    {name:'Yoga Flow',time:'17:00',duration:'60 min',spots:15,taken:7,instructor:'Laura P.',img:'yoga',level:'Bajo'},
+    {name:'CrossFit',time:'19:30',duration:'60 min',spots:16,taken:16,instructor:'Diego F.',img:'class1',level:'Alto'},
+  ],
+  Jue:[
+    {name:'Zumba',time:'10:00',duration:'60 min',spots:25,taken:20,instructor:'Sandra L.',img:'class1',level:'Bajo'},
+    {name:'Spinning',time:'11:30',duration:'50 min',spots:18,taken:10,instructor:'Carlos R.',img:'cycling',level:'Medio'},
+    {name:'Body Combat',time:'18:30',duration:'55 min',spots:20,taken:15,instructor:'Luis T.',img:'class1',level:'Medio'},
+    {name:'HIIT Total',time:'20:00',duration:'45 min',spots:20,taken:19,instructor:'Ana M.',img:'class1',level:'Alto'},
+  ],
+  Vie:[
+    {name:'Yoga Flow',time:'8:00',duration:'60 min',spots:15,taken:11,instructor:'Laura P.',img:'yoga',level:'Bajo'},
+    {name:'Body Pump',time:'10:00',duration:'55 min',spots:20,taken:8,instructor:'Marta S.',img:'weights',level:'Medio'},
+    {name:'HIIT Total',time:'12:00',duration:'45 min',spots:20,taken:16,instructor:'Ana M.',img:'class1',level:'Alto'},
+    {name:'Spinning',time:'17:30',duration:'50 min',spots:18,taken:12,instructor:'Carlos R.',img:'cycling',level:'Medio'},
+    {name:'CrossFit',time:'19:00',duration:'60 min',spots:16,taken:10,instructor:'Diego F.',img:'class1',level:'Alto'},
+  ],
+  Sáb:[
+    {name:'Yoga Total',time:'9:00',duration:'75 min',spots:20,taken:7,instructor:'Laura P.',img:'yoga',level:'Bajo'},
+    {name:'HIIT Intensivo',time:'10:30',duration:'60 min',spots:20,taken:20,instructor:'Ana M.',img:'class1',level:'Alto'},
+    {name:'Zumba Party',time:'12:00',duration:'60 min',spots:30,taken:22,instructor:'Sandra L.',img:'class1',level:'Bajo'},
+    {name:'Spinning Avanzado',time:'11:00',duration:'60 min',spots:18,taken:14,instructor:'Carlos R.',img:'cycling',level:'Alto'},
+  ],
+};
+
+let curDay = 'Lun';
+let myBookings = new Set();
+
+function setDay(btn, day){
+  document.querySelectorAll('.day-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  curDay = day;
+  renderClasses();
+}
+
+function renderClasses(){
+  const classes = classData[curDay] || [];
+  const grid = document.getElementById('classes-grid');
+  grid.innerHTML = classes.map((c,i)=>{
+    const pct = Math.round(c.taken/c.spots*100);
+    const occClass = pct>=90?'occ-high':pct>=60?'occ-mid':'occ-low';
+    const isFull = c.taken>=c.spots;
+    const isBooked = myBookings.has(curDay+'-'+i);
+    const levelColor = c.level==='Alto'?'text-red-400':c.level==='Medio'?'text-yellow-400':'text-green-400';
+    return `<div class="class-card ${isFull&&!isBooked?'full':''}">
+      ${isBooked?'<span class="booked-badge">✓ RESERVADA</span>':''}
+      <div class="flex justify-between items-start mb-2">
+        <div><p class="font-bold">${c.name}</p><p class="text-gray-500 text-xs">${c.time} · ${c.duration}</p></div>
+        <span class="text-xs font-semibold ${levelColor}">${c.level}</span>
+      </div>
+      <p class="text-gray-500 text-xs mb-2">👤 ${c.instructor}</p>
+      <div class="occ-bar"><div class="occ-fill ${occClass}" style="width:${pct}%"></div></div>
+      <div class="flex justify-between items-center mt-2">
+        <span class="text-xs text-gray-500">${isFull?'<span class="text-red-400 font-semibold">Lleno</span>':c.spots-c.taken+' plazas libres'}</span>
+        ${isBooked
+          ? '<button onclick="cancelClass('+i+')" class="text-xs px-3 py-1 glass rounded-lg hover:border-red-500/30 transition text-red-400">Cancelar</button>'
+          : isFull
+          ? '<button class="text-xs px-3 py-1 glass rounded-lg opacity-50 cursor-not-allowed">Lista espera</button>'
+          : '<button onclick="bookClass('+i+')" class="text-xs px-3 py-1 rounded-lg font-semibold transition" style="background:linear-gradient(135deg,#a855f7,#ec4899)">Reservar</button>'
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function bookClass(i){
+  myBookings.add(curDay+'-'+i);
+  classData[curDay][i].taken = Math.min(classData[curDay][i].taken+1, classData[curDay][i].spots);
+  renderClasses();
+}
+function cancelClass(i){
+  myBookings.delete(curDay+'-'+i);
+  classData[curDay][i].taken = Math.max(classData[curDay][i].taken-1, 0);
+  renderClasses();
+}
+
+function calcIMC(){
+  const w = parseFloat(document.getElementById('imc-weight').value);
+  const h = parseFloat(document.getElementById('imc-height').value)/100;
+  if(!w||!h) return;
+  const imc = (w/(h*h)).toFixed(1);
+  document.getElementById('imc-val').textContent = imc;
+  const result = document.getElementById('imc-result');
+  result.classList.remove('hidden');
+  const cat = document.getElementById('imc-cat');
+  const range = document.getElementById('imc-range');
+  const ptr = document.getElementById('imc-ptr');
+  if(imc<18.5){cat.textContent='Bajo peso';cat.className='text-sm font-bold px-3 py-1 rounded-full bg-blue-900 text-blue-300';range.textContent='< 18.5';ptr.style.left='8%';}
+  else if(imc<25){cat.textContent='Peso normal';cat.className='text-sm font-bold px-3 py-1 rounded-full bg-green-900 text-green-300';range.textContent='18.5 – 24.9';ptr.style.left='32%';}
+  else if(imc<30){cat.textContent='Sobrepeso';cat.className='text-sm font-bold px-3 py-1 rounded-full bg-yellow-900 text-yellow-300';range.textContent='25 – 29.9';ptr.style.left='60%';}
+  else{cat.textContent='Obesidad';cat.className='text-sm font-bold px-3 py-1 rounded-full bg-red-900 text-red-300';range.textContent='≥ 30';ptr.style.left='82%';}
+  const goal = document.getElementById('imc-goal').value;
+  const reco = {
+    perder:['🔥 HIIT Total — Quema máxima de calorías','🚴 Spinning — Cardio intenso de bajo impacto','💃 Zumba — Cardio divertido y constante'],
+    ganar:['🏋️ Body Pump — Tonificación con pesas','⚡ CrossFit — Fuerza funcional total','💪 HIIT Total — Masa muscular + metabolismo'],
+    mantener:['🧘 Yoga Flow — Equilibrio y bienestar','🚴 Spinning — Mantenimiento cardiovascular','🥊 Body Combat — Tonificación general'],
+    flexibilidad:['🧘 Yoga Flow — Flexibilidad y mindfulness','🌿 Pilates — Core y movilidad','🧘 Yoga Restaurativo — Recuperación activa'],
+  };
+  document.getElementById('imc-reco').innerHTML = '<p class="font-semibold text-sm text-gray-400 uppercase tracking-wider mb-3">Clases recomendadas para ti</p>'+(reco[goal]||[]).map(r=>`<div class="glass rounded-xl p-4 text-sm">${r}</div>`).join('');
+}
+
+renderClasses();
+// Simulate live occupancy changes
+setInterval(()=>{
+  const day = classData[curDay];
+  if(day){
+    const idx = Math.floor(Math.random()*day.length);
+    const delta = Math.random()>.5?1:-1;
+    day[idx].taken = Math.max(0,Math.min(day[idx].spots, day[idx].taken+delta));
+    renderClasses();
+  }
+}, 5000);
+</script>
+</body>
+</html>
